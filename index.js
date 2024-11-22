@@ -1,60 +1,68 @@
-// index.js
 const express = require('express');
 const axios = require('axios');
+const bodyParser = require('body-parser');
+
 const app = express();
-
-app.use(express.json());
-
 const TOKEN = '7233829367:AAGyzkwOoC5af3TeJ71h4QqSgrVTkRnpJ7I';
-const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
+const BASE_URL = `https://api.telegram.org/bot${TOKEN}/`;
 
-async function sendMessage(chatId, text) {  
+// Middleware para parsear JSON
+app.use(bodyParser.json());
+
+// Función para enviar mensajes a Telegram - Equivalente exacto a la función send_message de Python
+async function sendMessage(chatId, text) {
+    const url = `${BASE_URL}sendMessage`;
+    const data = {
+        chat_id: chatId,
+        text: text,
+        parse_mode: 'HTML'
+    };
     try {
-        await axios.post(`${TELEGRAM_API}/sendMessage`, {
-            chat_id: chatId,
-            text: text,
-            parse_mode: 'HTML'
-        });
+        await axios.post(url, data);
     } catch (error) {
         console.error('Error sending message:', error);
     }
 }
 
-app.post('/', async (req, res) => {
-    try {
-        const { message } = req.body;
-        
-        if (message) {
-            const chatId = message.chat.id;
-            const text = message.text;
-
-            let response;
-            switch (text) {
-                case '/start':
+// Webhook - Equivalente exacto a la ruta webhook de Flask
+app.all('/', async (req, res) => {
+    // Manejo de GET request
+    if (req.method === 'GET') {
+        return res.status(200).send('¡Bot funcionando!');
+    }
+    
+    // Manejo de POST request - igual que en Flask
+    if (req.method === 'POST') {
+        try {
+            const update = req.body;
+            
+            if ('message' in update) {
+                const chatId = update.message.chat.id;
+                const message = update.message.text || '';
+                
+                let response;
+                // Misma lógica de respuesta que en Flask
+                if (message === '/start') {
                     response = 'Me has iniciado';
-                    break;
-                case '/info':
+                } else if (message === '/info') {
                     response = 'Hola! Soy @Sergioclo10 y estas usando mi bot';
-                    break;
-                default:
+                } else {
                     response = 'No te he entendido lo siento bro';
+                }
+                
+                await sendMessage(chatId, response);
             }
-
-            await sendMessage(chatId, response);
+            
+            return res.status(200).send('ok');
+        } catch (error) {
+            console.error(error);
+            return res.status(500).send(error.toString());
         }
-
-        res.send('OK');
-    } catch (error) {
-        console.error('Error in webhook:', error);
-        res.status(500).send('Error en el servidor');
     }
 });
 
-app.get('/', (req, res) => {
-    res.send('¡Bot funcionando!');
-});
-
+// Iniciar servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
