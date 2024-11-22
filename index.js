@@ -19,7 +19,7 @@ const SPECIALTIES = {
     DENTAL: 'Odontología'
 };
 
-// Horarios disponibles (simulados)
+// Horarios disponibles
 const AVAILABLE_HOURS = [
     '09:00', '09:30', '10:00', '10:30', '11:00',
     '11:30', '14:00', '14:30', '15:00', '15:30'
@@ -113,10 +113,10 @@ _En caso de emergencia, por favor contacta directamente a estos números._
     `
 };
 
-// Middleware
+// Middleware para parsear JSON
 app.use(bodyParser.json());
 
-// Función para enviar mensajes
+// Función mejorada para enviar mensajes
 async function sendMessage(chatId, text, extra = {}) {
     try {
         const url = `${BASE_URL}sendMessage`;
@@ -132,37 +132,6 @@ async function sendMessage(chatId, text, extra = {}) {
         console.error('Error al enviar mensaje:', error.response?.data || error.message);
         throw new Error('Error al enviar mensaje');
     }
-}
-
-// Función para generar calendario
-function generateCalendar(startDate = new Date()) {
-    const calendar = {
-        reply_markup: {
-            inline_keyboard: []
-        }
-    };
-    
-    let currentRow = [];
-    for (let i = 0; i < 10; i++) {
-        const date = new Date(startDate);
-        date.setDate(date.getDate() + i);
-        const dateStr = date.toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit'
-        });
-        
-        currentRow.push({
-            text: dateStr,
-            callback_data: `date_${date.toISOString().split('T')[0]}`
-        });
-        
-        if (currentRow.length === 5 || i === 9) {
-            calendar.reply_markup.inline_keyboard.push([...currentRow]);
-            currentRow = [];
-        }
-    }
-    
-    return calendar;
 }
 
 // Función para generar horarios disponibles
@@ -189,7 +158,12 @@ function generateTimeSlots() {
     return timeSlots;
 }
 
-// Manejador principal
+// Ruta principal para verificar el estado del bot
+app.get('/', (req, res) => {
+    res.send('Bot is running! 🚀');
+});
+
+// Webhook para Telegram
 app.post('/', async (req, res) => {
     try {
         const update = req.body;
@@ -210,7 +184,6 @@ app.post('/', async (req, res) => {
                     break;
                     
                 case '📋 Mis Citas':
-                    // Simulación de consulta de citas
                     const appointments = tempAppointments.get(chatId) || [];
                     if (appointments.length === 0) {
                         await sendMessage(chatId, MESSAGES.noAppointments);
@@ -227,10 +200,26 @@ ${index + 1}. ${app.specialty}
                 case '📞 Contacto Urgente':
                     await sendMessage(chatId, MESSAGES.emergencyContact);
                     break;
+
+                case '❌ Cancelar Cita':
+                    const userAppointments = tempAppointments.get(chatId) || [];
+                    if (userAppointments.length === 0) {
+                        await sendMessage(chatId, MESSAGES.noAppointments);
+                    } else {
+                        const cancelButtons = {
+                            reply_markup: {
+                                inline_keyboard: userAppointments.map((app, index) => ([{
+                                    text: `❌ ${app.specialty} - ${app.date} ${app.time}`,
+                                    callback_data: `cancel_${index}`
+                                }]))
+                            }
+                        };
+                        await sendMessage(chatId, '*Selecciona la cita que deseas cancelar:*', cancelButtons);
+                    }
+                    break;
                     
                 default:
                     if (userStates.get(chatId) === 'ENTERING_DATE') {
-                        // Validación simple de fecha (puedes mejorarla)
                         const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
                         if (dateRegex.test(text)) {
                             tempAppointments.set(chatId, {
@@ -263,7 +252,7 @@ ${index + 1}. ${app.specialty}
                 const appointment = tempAppointments.get(chatId);
                 appointment.time = time;
                 
-                // Guardar la cita (simulado)
+                // Guardar la cita
                 const userAppointments = tempAppointments.get(chatId) || [];
                 userAppointments.push(appointment);
                 tempAppointments.set(chatId, userAppointments);
@@ -284,6 +273,16 @@ ${index + 1}. ${app.specialty}
                 
                 userStates.delete(chatId);
             }
+            else if (data.startsWith('cancel_')) {
+                const index = parseInt(data.split('_')[1]);
+                const userAppointments = tempAppointments.get(chatId) || [];
+                if (index >= 0 && index < userAppointments.length) {
+                    const canceledAppointment = userAppointments[index];
+                    userAppointments.splice(index, 1);
+                    tempAppointments.set(chatId, userAppointments);
+                    await sendMessage(chatId, `✅ Cita cancelada exitosamente:\n\n${canceledAppointment.specialty}\n📅 ${canceledAppointment.date}\n⏰ ${canceledAppointment.time}`);
+                }
+            }
             
             // Responder al callback query
             try {
@@ -302,19 +301,37 @@ ${index + 1}. ${app.specialty}
     }
 });
 
-// Manejador de errores
-app.use((error, req, res, next) => {
-    console.error('Error en la aplicación:', error);
-    res.status(500).send('Error interno del servidor');
-});
+// Configurar webhook al inicio
+async function setupWebhook() {
+    try {
+        const webhookUrl = process.env.RENDER_EXTERNAL_URL || `https://your-app-name.onrender.com`;
+        const response = await axios.post(`${BASE_URL}setWebhook`, {
+            url: webhookUrl
+        });
+        console.log('Webhook configurado:', response.data);
+    } catch (error) {
+        console.error('Error configurando webhook:', error);
+    }
+}
 
 // Iniciar servidor
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`
 🏥 Bot de Citas Médicas Activo
 📡 Puerto: ${PORT}
 ⏰ Iniciado: ${new Date().toLocaleString()}
 ✨ Listo para atender pacientes
+🔗 URL: ${process.env.RENDER_EXTERNAL_URL || 'localhost'}
     `);
+    setupWebhook();
+});
+
+// Manejo de errores no capturados
+process.on('uncaughtException', (error) => {
+    console.error('Error no capturado:', error);
+});
+
+process.on('unhandledRejection', (error) => {
+    console.error('Promesa rechazada no manejada:', error);
 });
