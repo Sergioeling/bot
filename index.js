@@ -45,193 +45,315 @@ const SPECIALTY_MENU = {
     }
 };
 
-// Mensajes del sistema
 const MESSAGES = {
     welcome: `
 🏥 *Bienvenido al Sistema de Citas Médicas*
 
-Soy tu asistente virtual para gestionar tus citas médicas.
-    
-📌 *Servicios Disponibles:*
-• Agendar nuevas citas
-• Consultar tus citas
-• Cancelar citas existentes
-• Contacto de emergencia
-    
-¿En qué puedo ayudarte hoy?
-    `,
+Por favor, selecciona una opción:
+
+1️⃣ Agendar Cita
+2️⃣ Mis Citas
+3️⃣ Cancelar Cita
+4️⃣ Contacto Urgente
+5️⃣ Ayuda
+
+_Escribe el número de la opción deseada (1-5)_
+`,
+    invalidOption: `
+❌ *Opción no válida*
+
+Por favor, selecciona una opción válida del menú:
+
+1️⃣ Agendar Cita
+2️⃣ Mis Citas
+3️⃣ Cancelar Cita
+4️⃣ Contacto Urgente
+5️⃣ Ayuda
+`,
     appointmentStart: `
-🗓️ *Proceso de Agendamiento de Cita*
-    
-Por favor, selecciona la especialidad que necesitas:
-    `,
+🗓️ *Selecciona la Especialidad:*
+
+1️⃣ Medicina General
+2️⃣ Cardiología
+3️⃣ Dermatología
+4️⃣ Pediatría
+5️⃣ Odontología
+
+_Escribe el número de la especialidad (1-5)_
+`,
+    invalidSpecialty: `
+❌ *Especialidad no válida*
+
+Por favor, selecciona una especialidad válida (1-5):
+
+1️⃣ Medicina General
+2️⃣ Cardiología
+3️⃣ Dermatología
+4️⃣ Pediatría
+5️⃣ Odontología
+`,
     selectDate: `
-📅 *Selecciona la fecha deseada*
-    
-Formato: DD/MM/YYYY
-Ejemplo: 25/11/2024
-    
-_Solo fechas dentro de los próximos 30 días_
-    `,
+📅 *Selecciona una fecha disponible:*
+
+_Toca uno de los días disponibles en el calendario_
+`,
+    timeSelection: `
+⏰ *Selecciona un horario disponible:*
+
+_Toca uno de los horarios disponibles_
+`,
+    noAppointments: `
+ℹ️ *No tienes citas programadas*
+
+¿Qué deseas hacer?
+
+1️⃣ Agendar nueva cita
+5️⃣ Volver al menú principal
+
+_Escribe el número de la opción deseada_
+`,
+    emergencyContact: `
+🚨 *Contactos de Emergencia*
+
+📞 Emergencias: 911
+🏥 Guardia Médica: +1 234 567 890
+🚑 Ambulancia: +1 234 567 891
+
+_¿Qué deseas hacer?_
+
+1️⃣ Volver al menú principal
+`,
+    help: `
+❓ *Centro de Ayuda*
+
+📋 *Comandos Disponibles:*
+• /start - Iniciar/Reiniciar bot
+• /menu - Mostrar menú principal
+• /help - Mostrar esta ayuda
+
+💡 *Tips:*
+• Usa números (1-5) para seleccionar opciones
+• Puedes cancelar cualquier proceso escribiendo "cancelar"
+• Para emergencias, selecciona la opción 4
+
+_¿Qué deseas hacer?_
+
+1️⃣ Volver al menú principal
+`,
     appointmentConfirmation: (specialty, date, time) => `
-✅ *Resumen de tu Cita*
-    
+✅ *Confirma tu Cita*
+
 👨‍⚕️ Especialidad: ${specialty}
 📅 Fecha: ${date}
 ⏰ Hora: ${time}
-    
+
 ¿Deseas confirmar esta cita?
-    `,
+
+1️⃣ Sí, confirmar
+2️⃣ No, cancelar
+`,
     appointmentSuccess: `
 ✅ *¡Cita Agendada con Éxito!*
-    
-Recibirás un recordatorio 24 horas antes.
-    
-Recomendaciones:
+
+Recordatorio:
 • Llega 15 minutos antes
 • Trae tu documento de identidad
 • Trae tus exámenes previos si los tienes
-    `,
-    noAppointments: `
-ℹ️ No tienes citas programadas actualmente.
-    
-Usa 🗓️ *Agendar Cita* para programar una nueva cita.
-    `,
+
+Recibirás un recordatorio 24 horas antes.
+
+1️⃣ Agendar otra cita
+2️⃣ Ver mis citas
+5️⃣ Volver al menú principal
+`,
+    cancelAppointment: (appointments) => `
+❌ *Cancelar Cita*
+
+Tus citas programadas:
+${appointments.map((app, index) => `
+${index + 1}. ${app.specialty}
+📅 Fecha: ${app.date}
+⏰ Hora: ${app.time}
+`).join('\n')}
+
+_Escribe el número de la cita que deseas cancelar_
+`,
+    appointmentCanceled: `
+✅ *Cita Cancelada Exitosamente*
+
+1️⃣ Agendar nueva cita
+2️⃣ Ver mis citas
+5️⃣ Volver al menú principal
+`,
+    cancelConfirm: (appointment) => `
+⚠️ *¿Confirmas que deseas cancelar esta cita?*
+
+👨‍⚕️ Especialidad: ${appointment.specialty}
+📅 Fecha: ${appointment.date}
+⏰ Hora: ${appointment.time}
+
+1️⃣ Sí, cancelar cita
+2️⃣ No, mantener cita
+`,
+    processing: `
+⏳ *Procesando tu solicitud...*
+
+Por favor, espera un momento.
+`,
     error: `
 ❌ *Ha ocurrido un error*
-    
-Por favor, intenta nuevamente o contacta a soporte.
-    `,
-    emergencyContact: `
-🚨 *Contactos de Emergencia*
-    
-🏥 Emergencias: 911
-👨‍⚕️ Guardia Médica: +1 234 567 890
-🚑 Ambulancia: +1 234 567 891
-    
-_En caso de emergencia, por favor contacta directamente a estos números._
-    `
+
+Por favor, intenta nuevamente o selecciona una opción:
+
+1️⃣ Reintentar
+5️⃣ Volver al menú principal
+`,
+    sessionExpired: `
+⚠️ *Sesión Expirada*
+
+Tu sesión ha expirado por inactividad.
+Por favor, selecciona una opción:
+
+1️⃣ Continuar donde lo dejaste
+5️⃣ Volver al menú principal
+`
 };
 
-// Middleware para parsear JSON
-app.use(bodyParser.json());
-
-// Función mejorada para enviar mensajes
-async function sendMessage(chatId, text, extra = {}) {
-    try {
-        const url = `${BASE_URL}sendMessage`;
-        const data = {
-            chat_id: chatId,
-            text: text,
-            parse_mode: 'Markdown',
-            ...extra
-        };
-        const response = await axios.post(url, data);
-        return response.data;
-    } catch (error) {
-        console.error('Error al enviar mensaje:', error.response?.data || error.message);
-        throw new Error('Error al enviar mensaje');
-    }
-}
-
-// Función para generar horarios disponibles
-function generateTimeSlots() {
-    const timeSlots = {
-        reply_markup: {
-            inline_keyboard: []
-        }
-    };
-    
-    let currentRow = [];
-    AVAILABLE_HOURS.forEach((time, index) => {
-        currentRow.push({
-            text: `⏰ ${time}`,
-            callback_data: `time_${time}`
-        });
-        
-        if (currentRow.length === 2 || index === AVAILABLE_HOURS.length - 1) {
-            timeSlots.reply_markup.inline_keyboard.push([...currentRow]);
-            currentRow = [];
-        }
-    });
-    
-    return timeSlots;
-}
-
-// Ruta principal para verificar el estado del bot
-app.get('/', (req, res) => {
-    res.send('Bot is running! 🚀');
-});
-
-// Webhook para Telegram
+// Manejador principal mejorado
 app.post('/', async (req, res) => {
     try {
         const update = req.body;
         
-        // Manejo de mensajes de texto
         if (update.message) {
             const chatId = update.message.chat.id;
-            const text = update.message.text || '';
+            const text = update.message.text?.trim().toLowerCase() || '';
             
-            switch (text) {
-                case '/start':
-                    await sendMessage(chatId, MESSAGES.welcome, MAIN_MENU);
-                    break;
-                    
-                case '🗓️ Agendar Cita':
-                    userStates.set(chatId, 'SELECTING_SPECIALTY');
-                    await sendMessage(chatId, MESSAGES.appointmentStart, SPECIALTY_MENU);
-                    break;
-                    
-                case '📋 Mis Citas':
-                    const appointments = tempAppointments.get(chatId) || [];
-                    if (appointments.length === 0) {
-                        await sendMessage(chatId, MESSAGES.noAppointments);
-                    } else {
-                        const appointmentsList = appointments.map((app, index) => `
+            // Comandos especiales
+            if (text === '/start' || text === '/menu') {
+                userStates.delete(chatId);
+                await sendMessage(chatId, MESSAGES.welcome);
+                return res.status(200).send('ok');
+            }
+            
+            if (text === '/help') {
+                await sendMessage(chatId, MESSAGES.help);
+                return res.status(200).send('ok');
+            }
+            
+            if (text === 'cancelar') {
+                userStates.delete(chatId);
+                await sendMessage(chatId, 'Proceso cancelado. Volviendo al menú principal...');
+                await sendMessage(chatId, MESSAGES.welcome);
+                return res.status(200).send('ok');
+            }
+            
+            // Estado actual del usuario
+            const currentState = userStates.get(chatId);
+            
+            // Manejo de menú principal
+            if (!currentState) {
+                if (/^[1-5]$/.test(text)) {
+                    switch (text) {
+                        case '1': // Agendar Cita
+                            userStates.set(chatId, 'SELECTING_SPECIALTY');
+                            await sendMessage(chatId, MESSAGES.appointmentStart);
+                            break;
+                            
+                        case '2': // Mis Citas
+                            const appointments = tempAppointments.get(chatId) || [];
+                            if (appointments.length === 0) {
+                                await sendMessage(chatId, MESSAGES.noAppointments);
+                            } else {
+                                const appointmentsList = appointments.map((app, index) => `
 ${index + 1}. ${app.specialty}
 📅 Fecha: ${app.date}
 ⏰ Hora: ${app.time}
-                        `).join('\n');
-                        await sendMessage(chatId, `*Tus Citas Programadas:*\n${appointmentsList}`);
+                                `).join('\n');
+                                await sendMessage(chatId, `*Tus Citas Programadas:*\n${appointmentsList}`);
+                                await sendMessage(chatId, MESSAGES.welcome);
+                            }
+                            break;
+                            
+                        case '3': // Cancelar Cita
+                            const appsToCancel = tempAppointments.get(chatId) || [];
+                            if (appsToCancel.length === 0) {
+                                await sendMessage(chatId, MESSAGES.noAppointments);
+                            } else {
+                                userStates.set(chatId, 'SELECTING_CANCEL');
+                                await sendMessage(chatId, MESSAGES.cancelAppointment(appsToCancel));
+                            }
+                            break;
+                            
+                        case '4': // Contacto Urgente
+                            await sendMessage(chatId, MESSAGES.emergencyContact);
+                            break;
+                            
+                        case '5': // Ayuda
+                            await sendMessage(chatId, MESSAGES.help);
+                            break;
+                    }
+                } else {
+                    await sendMessage(chatId, MESSAGES.invalidOption);
+                }
+                return res.status(200).send('ok');
+            }
+            
+            // Manejo de estados específicos
+            switch (currentState) {
+                case 'SELECTING_SPECIALTY':
+                    if (/^[1-5]$/.test(text)) {
+                        const specialty = SPECIALTY_MAP[text];
+                        if (specialty) {
+                            await sendMessage(chatId, MESSAGES.processing);
+                            tempAppointments.set(chatId, { specialty });
+                            userStates.set(chatId, 'SELECTING_DATE');
+                            await sendMessage(chatId, MESSAGES.selectDate, generateCalendarKeyboard());
+                        } else {
+                            await sendMessage(chatId, MESSAGES.invalidSpecialty);
+                        }
+                    } else {
+                        await sendMessage(chatId, MESSAGES.invalidSpecialty);
                     }
                     break;
                     
-                case '📞 Contacto Urgente':
-                    await sendMessage(chatId, MESSAGES.emergencyContact);
-                    break;
-
-                case '❌ Cancelar Cita':
-                    const userAppointments = tempAppointments.get(chatId) || [];
-                    if (userAppointments.length === 0) {
-                        await sendMessage(chatId, MESSAGES.noAppointments);
+                case 'SELECTING_CANCEL':
+                    const appointments = tempAppointments.get(chatId) || [];
+                    const appointmentIndex = parseInt(text) - 1;
+                    
+                    if (appointmentIndex >= 0 && appointmentIndex < appointments.length) {
+                        const appointmentToCancel = appointments[appointmentIndex];
+                        userStates.set(chatId, 'CONFIRMING_CANCEL');
+                        tempAppointments.set(chatId, {
+                            ...tempAppointments.get(chatId),
+                            cancelIndex: appointmentIndex
+                        });
+                        await sendMessage(chatId, MESSAGES.cancelConfirm(appointmentToCancel));
                     } else {
-                        const cancelButtons = {
-                            reply_markup: {
-                                inline_keyboard: userAppointments.map((app, index) => ([{
-                                    text: `❌ ${app.specialty} - ${app.date} ${app.time}`,
-                                    callback_data: `cancel_${index}`
-                                }]))
-                            }
-                        };
-                        await sendMessage(chatId, '*Selecciona la cita que deseas cancelar:*', cancelButtons);
+                        await sendMessage(chatId, 'Número de cita inválido. Por favor, selecciona un número válido.');
+                        await sendMessage(chatId, MESSAGES.cancelAppointment(appointments));
+                    }
+                    break;
+                    
+                case 'CONFIRMING_CANCEL':
+                    if (text === '1') {
+                        const appointments = tempAppointments.get(chatId) || [];
+                        const cancelIndex = tempAppointments.get(chatId).cancelIndex;
+                        appointments.splice(cancelIndex, 1);
+                        tempAppointments.set(chatId, appointments);
+                        userStates.delete(chatId);
+                        await sendMessage(chatId, MESSAGES.appointmentCanceled);
+                    } else if (text === '2') {
+                        userStates.delete(chatId);
+                        await sendMessage(chatId, 'Cancelación abortada. Volviendo al menú principal...');
+                        await sendMessage(chatId, MESSAGES.welcome);
+                    } else {
+                        await sendMessage(chatId, 'Opción no válida. Por favor, selecciona 1 para confirmar o 2 para cancelar.');
                     }
                     break;
                     
                 default:
-                    if (userStates.get(chatId) === 'ENTERING_DATE') {
-                        const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
-                        if (dateRegex.test(text)) {
-                            tempAppointments.set(chatId, {
-                                ...tempAppointments.get(chatId),
-                                date: text
-                            });
-                            userStates.set(chatId, 'SELECTING_TIME');
-                            await sendMessage(chatId, '⏰ Selecciona un horario disponible:', generateTimeSlots());
-                        } else {
-                            await sendMessage(chatId, '❌ Formato de fecha incorrecto. Por favor, usa DD/MM/YYYY');
-                        }
-                    }
+                    await sendMessage(chatId, MESSAGES.invalidOption);
+                    break;
             }
         }
         
@@ -241,56 +363,61 @@ ${index + 1}. ${app.specialty}
             const chatId = callbackQuery.message.chat.id;
             const data = callbackQuery.data;
             
-            if (data.startsWith('spec_')) {
-                const specialty = SPECIALTIES[data.split('_')[1]];
-                tempAppointments.set(chatId, { specialty });
-                userStates.set(chatId, 'ENTERING_DATE');
-                await sendMessage(chatId, MESSAGES.selectDate);
-            }
-            else if (data.startsWith('time_')) {
-                const time = data.split('_')[1];
-                const appointment = tempAppointments.get(chatId);
-                appointment.time = time;
-                
-                // Guardar la cita
-                const userAppointments = tempAppointments.get(chatId) || [];
-                userAppointments.push(appointment);
-                tempAppointments.set(chatId, userAppointments);
-                
-                // Enviar confirmación
-                await sendMessage(
-                    chatId,
-                    MESSAGES.appointmentSuccess,
-                    {
-                        reply_markup: {
-                            inline_keyboard: [[
-                                {text: '📱 Añadir a Calendario', callback_data: 'add_calendar'},
-                                {text: '📋 Ver mis Citas', callback_data: 'view_appointments'}
-                            ]]
-                        }
-                    }
-                );
-                
-                userStates.delete(chatId);
-            }
-            else if (data.startsWith('cancel_')) {
-                const index = parseInt(data.split('_')[1]);
-                const userAppointments = tempAppointments.get(chatId) || [];
-                if (index >= 0 && index < userAppointments.length) {
-                    const canceledAppointment = userAppointments[index];
-                    userAppointments.splice(index, 1);
-                    tempAppointments.set(chatId, userAppointments);
-                    await sendMessage(chatId, `✅ Cita cancelada exitosamente:\n\n${canceledAppointment.specialty}\n📅 ${canceledAppointment.date}\n⏰ ${canceledAppointment.time}`);
-                }
-            }
-            
-            // Responder al callback query
             try {
+                if (data.startsWith('date_')) {
+                    const date = data.split('_')[1];
+                    const appointment = tempAppointments.get(chatId) || {};
+                    appointment.date = date;
+                    tempAppointments.set(chatId, appointment);
+                    userStates.set(chatId, 'SELECTING_TIME');
+                    await sendMessage(chatId, MESSAGES.timeSelection, generateTimeSlots(date));
+                }
+                else if (data.startsWith('time_')) {
+                    const time = data.split('_')[1];
+                    const appointment = tempAppointments.get(chatId);
+                    appointment.time = time;
+                    
+                    await sendMessage(
+                        chatId,
+                        MESSAGES.appointmentConfirmation(
+                            appointment.specialty,
+                            appointment.date,
+                            appointment.time
+                        ),
+                        {
+                            reply_markup: {
+                                inline_keyboard: [
+                                    [
+                                        { text: '✅ Confirmar', callback_data: 'confirm_yes' },
+                                        { text: '❌ Cancelar', callback_data: 'confirm_no' }
+                                    ]
+                                ]
+                            }
+                        }
+                    );
+                }
+                else if (data === 'confirm_yes') {
+                    const appointment = tempAppointments.get(chatId);
+                    const userAppointments = tempAppointments.get(chatId) || [];
+                    userAppointments.push(appointment);
+                    tempAppointments.set(chatId, userAppointments);
+                    
+                    await sendMessage(chatId, MESSAGES.appointmentSuccess);
+                    userStates.delete(chatId);
+                }
+                else if (data === 'confirm_no') {
+                    await sendMessage(chatId, '❌ Cita cancelada.');
+                    await sendMessage(chatId, MESSAGES.welcome);
+                    userStates.delete(chatId);
+                }
+                
+                // Responder al callback query
                 await axios.post(`${BASE_URL}answerCallbackQuery`, {
                     callback_query_id: callbackQuery.id
                 });
             } catch (error) {
-                console.error('Error al responder callback query:', error);
+                console.error('Error procesando callback:', error);
+                await sendMessage(chatId, MESSAGES.error);
             }
         }
         
@@ -301,37 +428,23 @@ ${index + 1}. ${app.specialty}
     }
 });
 
-// Configurar webhook al inicio
-async function setupWebhook() {
-    try {
-        const webhookUrl = process.env.RENDER_EXTERNAL_URL || `https://your-app-name.onrender.com`;
-        const response = await axios.post(`${BASE_URL}setWebhook`, {
-            url: webhookUrl
-        });
-        console.log('Webhook configurado:', response.data);
-    } catch (error) {
-        console.error('Error configurando webhook:', error);
+// Función mejorada de envío de mensajes con reintentos
+async function sendMessage(chatId, text, extra = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const url = `${BASE_URL}sendMessage`;
+            const data = {
+                chat_id: chatId,
+                text: text,
+                parse_mode: 'Markdown',
+                ...extra
+            };
+            const response = await axios.post(url, data);
+            return response.data;
+        } catch (error) {
+            console.error(`Error enviando mensaje (intento ${i + 1}):`, error.response?.data || error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+        }
     }
 }
-
-// Iniciar servidor
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`
-🏥 Bot de Citas Médicas Activo
-📡 Puerto: ${PORT}
-⏰ Iniciado: ${new Date().toLocaleString()}
-✨ Listo para atender pacientes
-🔗 URL: ${process.env.RENDER_EXTERNAL_URL || 'localhost'}
-    `);
-    setupWebhook();
-});
-
-// Manejo de errores no capturados
-process.on('uncaughtException', (error) => {
-    console.error('Error no capturado:', error);
-});
-
-process.on('unhandledRejection', (error) => {
-    console.error('Promesa rechazada no manejada:', error);
-});
