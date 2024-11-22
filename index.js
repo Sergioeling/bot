@@ -8,7 +8,7 @@ app.use(express.json());
 const TOKEN = '7233829367:AAGyzkwOoC5af3TeJ71h4QqSgrVTkRnpJ7I';
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
 
-async function sendMessage(chatId, text) {
+async function sendMessage(chatId, text) {  
     try {
         await axios.post(`${TELEGRAM_API}/sendMessage`, {
             chat_id: chatId,
